@@ -61,6 +61,9 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
       run: |
+        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+        gpg-connect-agent reloadagent /bye
+        
         git config user.name "${{ steps.import-gpg.outputs.name }}"
         git config user.email "${{ steps.import-gpg.outputs.email }}"
 
