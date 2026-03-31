@@ -66,11 +66,13 @@ To create a new release:
 
 1. **Create a version tag** (replace `v1.0` with your version):
    ```bash
-   git tag v1.0
+   git tag v1.0.0
    
 2. ***Push version tag***
 	```bash
-	git push origin v1.0
+	git push origin v1.0.0
+
+ The build number will be added automatically to the end buy the workflow.
 
 ## 📄 License
 
