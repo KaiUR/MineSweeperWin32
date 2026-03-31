@@ -62,26 +62,26 @@ END
  	ICON RESOURCES
  ============================================================================
  */
-IDI_MYICON ICON ".\\Data\\menu_one.ico"
+IDI_MYICON ICON "../Data/menu_one.ico"
 
 /*
  ============================================================================
  	BITMAP RESOURCES
  ============================================================================
  */
-IDB_BLANK_SPACE BITMAP ".\\Data\\blank_space.bmp"
-IDB_BLANK_SPACE_EMPTY BITMAP ".\\Data\\blank_space_empty.bmp"
-IDB_MINE_BLACK BITMAP ".\\Data\\mine_black.bmp"
-IDB_MINE_RED BITMAP ".\\Data\\mine_red.bmp"
-IDB_SPACE_1 BITMAP  ".\\Data\\space_1.bmp"
-IDB_SPACE_2 BITMAP  ".\\Data\\space_2.bmp"
-IDB_SPACE_3 BITMAP  ".\\Data\\space_3.bmp"
-IDB_SPACE_4 BITMAP  ".\\Data\\space_4.bmp"
-IDB_SPACE_5 BITMAP  ".\\Data\\space_5.bmp"
-IDB_SPACE_6 BITMAP  ".\\Data\\space_6.bmp"
-IDB_SPACE_7 BITMAP  ".\\Data\\space_7.bmp"
-IDB_SPACE_8 BITMAP  ".\\Data\\space_8.bmp"
-IDB_SPACE_FLAG BITMAP  ".\\Data\\space_flag.bmp"
+IDB_BLANK_SPACE BITMAP "../Data/blank_space.bmp"
+IDB_BLANK_SPACE_EMPTY BITMAP "../Data/blank_space_empty.bmp"
+IDB_MINE_BLACK BITMAP "../Data/mine_black.bmp"
+IDB_MINE_RED BITMAP "../Data/mine_red.bmp"
+IDB_SPACE_1 BITMAP  "../Data/space_1.bmp"
+IDB_SPACE_2 BITMAP  "../Data/space_2.bmp"
+IDB_SPACE_3 BITMAP "../Data/space_3.bmp"
+IDB_SPACE_4 BITMAP "../Data/space_4.bmp"
+IDB_SPACE_5 BITMAP  "../Data/space_5.bmp"
+IDB_SPACE_6 BITMAP  "../Data/space_6.bmp"
+IDB_SPACE_7 BITMAP  "../Data/space_7.bmp"
+IDB_SPACE_8 BITMAP  "../Data/space_8.bmp"
+IDB_SPACE_FLAG BITMAP "../Data/space_flag.bmp"
 
 /*
  ============================================================================
