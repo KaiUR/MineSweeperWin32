@@ -63,6 +63,9 @@ jobs:
       run: |
         git config user.name "${{ steps.import-gpg.outputs.name }}"
         git config user.email "${{ steps.import-gpg.outputs.email }}"
+
+        git config --global gpg.program gpg
+        git config --global commit.gpgsign true
         
         git checkout -B master origin/master
         git pull origin master # Keep it sync'd
