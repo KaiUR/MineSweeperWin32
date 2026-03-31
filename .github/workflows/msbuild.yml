@@ -28,6 +28,19 @@ jobs:
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-ninja
+          
+    - name: Update Contributors File
+      shell: bash
+      run: |
+        echo "# Contributors" > CONTRIBUTORS.md
+        echo "" >> CONTRIBUTORS.md
+        echo "Thanks to everyone who has helped with MineSweeperWin32:" >> CONTRIBUTORS.md
+        echo "" >> CONTRIBUTORS.md
+        
+        # This pulls all unique committers and formats them as a Markdown list
+        git shortlog -sn --all | cut -f2- | sed 's/^/* /' >> CONTRIBUTORS.md
+        
+        echo "CONTRIBUTORS.md updated from Git history."
 
     - name: Configure and Build
       shell: msys2 {0}
@@ -45,7 +58,7 @@ jobs:
         git checkout -B master origin/master
         git pull origin master # Keep it sync'd
         
-        git add build_number.txt
+        git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
           git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
