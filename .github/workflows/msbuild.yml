@@ -71,20 +71,22 @@ jobs:
       run: |
         BASE_TAG=${{ github.ref_name }}
         BUILD_NUM=$(cat build_number.txt)
-        
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
-        echo "Creating release for $FULL_VERSION"
+        
+        git tag -d "$BASE_TAG" || true
+        git push origin --delete "$BASE_TAG" || true
 
-        git tag -d "$BASE_TAG"
-        git push origin --delete "$BASE_TAG"
-
+        REPO_PATH="${{ github.repository }}"
+        API_URL="https://github.com{REPO_PATH}/git/refs"
         SHA=$(git rev-parse HEAD)
+        
+        echo "Creating verified tag $FULL_VERSION at $SHA"
 
-        curl -L -X POST \
+        curl -f -sS -X POST \
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          https://github.com{{ github.repository }}/git/refs \
+          "$API_URL" \
           -d "{\"ref\":\"refs/tags/$FULL_VERSION\",\"sha\":\"$SHA\"}"
         
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
