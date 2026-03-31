@@ -60,14 +60,23 @@ jobs:
     - name: Commit and Push Updated Build Number
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
-      run: |        
+      run: |
+        git config --global user.name "${{ steps.import-gpg.outputs.name }}"
+        git config --global user.email "${{ steps.import-gpg.outputs.email }}"
+        git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
+
+        git config --global gpg.program gpg
+        
         git checkout -B master origin/master
         git pull origin master
         
         git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
-          git commit -S -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
+          echo "${{ secrets.GPG_PASSPHRASE }}" | git commit -S -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]" \
+            --passphrase-fd 0 \
+            --pinentry-mode loopback \
+            --gpg-sign="${{ steps.import-gpg.outputs.keyid }}"
           git push origin master
         fi
         
@@ -79,8 +88,16 @@ jobs:
         BUILD_NUM=$(cat build_number.txt)
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         
-        git tag -S -d "$BASE_TAG" || true
+        git tag -d "$BASE_TAG" || true
         git push origin --delete "$BASE_TAG" || true
+
+        echo "${{ secrets.GPG_PASSPHRASE }}" | git tag -s "$FULL_VERSION" \
+        -m "Release $FULL_VERSION" \
+        --passphrase-fd 0 \
+        --pinentry-mode loopback \
+        -u "${{ steps.import-gpg.outputs.keyid }}"
+        
+        git push origin "$FULL_VERSION"
         
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
           --title "MineSweeper $FULL_VERSION" \
