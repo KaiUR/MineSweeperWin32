@@ -20,7 +20,7 @@ string(TIMESTAMP CURRENT_DAY "%d")
 
 # --- Configuration ---
 set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} --use-temp-file")
-configure_file(version.h.in "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
+configure_file(res/version.h.in "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 
 # --- Data Assets (for IDE visibility) ---
 set(GAME_DATA
