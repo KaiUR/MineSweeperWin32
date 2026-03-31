@@ -74,7 +74,7 @@ jobs:
         git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
-          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]" \
+          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
           git push origin master
         fi
         
