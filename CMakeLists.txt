@@ -65,5 +65,7 @@ install(TARGETS MineSweeperWin32
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+install(FILES CONTRIBUTORS.md DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 # Optional: Install the Data folder along with the exe
 install(DIRECTORY Data/ DESTINATION ${CMAKE_INSTALL_BINDIR}/Data)
