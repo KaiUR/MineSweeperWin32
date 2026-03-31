@@ -69,7 +69,7 @@ To create a new release:
    git tag v1.0
    
 2. ***Push version tag***
-	'''bash
+	```bash
 	git push origin v1.0
 
 ## 📄 License
