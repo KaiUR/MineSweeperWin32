@@ -61,22 +61,21 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
       run: |
-        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-        gpg-connect-agent reloadagent /bye
-        
-        git config user.name "${{ steps.import-gpg.outputs.name }}"
-        git config user.email "${{ steps.import-gpg.outputs.email }}"
+        git config --global user.name "${{ steps.import-gpg.outputs.name }}"
+        git config --global user.email "${{ steps.import-gpg.outputs.email }}"
+        git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
 
-        git config --global gpg.program gpg
+        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
         git config --global commit.gpgsign true
         
         git checkout -B master origin/master
-        git pull origin master # Keep it sync'd
+        git pull origin master
         
         git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
-          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
+          # Add the -S flag to actually trigger the GPG signature
+          git commit -S -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
           git push origin master
         fi
         
