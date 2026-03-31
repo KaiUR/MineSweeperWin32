@@ -17,10 +17,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up MinGW-w64
-      uses: egor-tensin/setup-mingw@v2
+    - name: Set up MSYS2
+      uses: msys2/setup-msys2@v2
       with:
-        platform: x64
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
 
     - name: Compile MineSweeper
       # -lgdi32 and -luser32 link the Windows libraries you
