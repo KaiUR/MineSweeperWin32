@@ -50,6 +50,7 @@ add_executable(MineSweeperWin32 WIN32
     src/main.h
     src/resource.h
     res/resource.rc
+    Data/blank_space.bmp Data/blank_space_empty.bmp Data/menu_one.ico Data/mine_black.bmp Data/mine_red.bmp Data/space_1.bmp Data/space_2.bmp Data/space_3.bmp Data/space_4.bmp Data/space_5.bmp Data/space_6.bmp Data/space_7.bmp Data/space_8.bmp Data/space_flag.bmp
 )
 
 # --- Include Paths ---
