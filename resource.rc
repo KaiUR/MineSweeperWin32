@@ -1,4 +1,5 @@
 #include "resource.h"
+#include "version.h"
 
 /*
  ============================================================================
@@ -6,8 +7,8 @@
  ============================================================================
  */
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION     1,0,0,0
-    PRODUCTVERSION  1,0,0,0
+    FILEVERSION VERSION_BINARY
+    PRODUCTVERSION VERSION_BINARY
     FILEFLAGSMASK 0x3fL
     FILEFLAGS 0x0L
     FILEOS 0x40004L
@@ -22,9 +23,10 @@ VS_VERSION_INFO VERSIONINFO
                     VALUE "LegalCopyright",   "Kai-Uwe Rathjen\0"
                     VALUE "CompanyName",      "\0"
                     VALUE "FileDescription",  "GUI Minesweeper W32API Game\0"
-                    VALUE "FileVersion",      "1.0.0.0\0"
+                    VALUE "FileVersion",      VERSION_STRING
                     VALUE "ProductName",      "Minesweeper\0"
-                    VALUE "ProductVersion",   "1.0.0.0\0"
+                    VALUE "ProductVersion",   VERSION_STRING
+                    VALUE "BuildDate",        BUILD_DATE_STR
                 END
             END
         BLOCK "VarFileInfo"
