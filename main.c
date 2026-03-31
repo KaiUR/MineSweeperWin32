@@ -149,7 +149,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                         PostMessage(hwnd, WM_CLOSE, 0, 0);
                         break;
                 //Start New Game
-                case ID_FILE_NEW_GAME:
+                case ID_FILE_NEW_GAME:;
                         //Get Current window position
                                 RECT Rect;
                                 GetWindowRect(hwnd, &Rect);
@@ -231,7 +231,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     }
                         break;
                 //Allows to replay last game
-                case ID_FILE_REPLAY_GAME:
+                case ID_FILE_REPLAY_GAME:;
                     int ret_replay_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_REPLAY_GAME), hwnd, (DLGPROC)STD_DlgProc);
                     if(ret_replay_game == -1)
                     {
@@ -271,7 +271,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     }
                         break;
                 //Shows helptext
-                case ID_HELP_HELP:
+                case ID_HELP_HELP:;
                     int ret_help = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HELP), hwnd, (DLGPROC)STD_DlgProc);
                     if(ret_help == -1)
                     {
@@ -280,7 +280,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     }
                         break;
                 //Shows about text
-                case ID_HELP_ABOUT:
+                case ID_HELP_ABOUT:;
                     int ret_about = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, (DLGPROC)STD_DlgProc);
                     if(ret_about == -1)
                     {
@@ -327,7 +327,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
         break;
         // Paint graphics to screen
-        case WM_PAINT:
+        case WM_PAINT:;
                         PAINTSTRUCT ps;
 
                         RECT rcWindow;
@@ -487,7 +487,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                         Rectangle(hdc, r_bottom.left, r_bottom.top, r_bottom.right, r_bottom.bottom);
 
                                         char message_str[30];
-                                        sprintf(message_str, "Mines remaining: %d", game_board.remain_mines);
+                                        wsprintf(message_str, "Mines remaining: %d", game_board.remain_mines);
 
                                         SetTextColor(hdc, mines_rgbText);
                                         SetBkMode(hdc, TRANSPARENT);
@@ -499,7 +499,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                         unsigned long secs = timer_value - (hours * 3600) - (mins * 60);
 
                                         char message_str_timer[30];
-                                        sprintf(message_str_timer, "Time: %02lu:%02lu:%02lu", hours, mins, secs);
+                                        wsprintf(message_str_timer, "Time: %02lu:%02lu:%02lu", hours, mins, secs);
 
                                         SetTextColor(hdc, timer_rgbText);
                                         SetBkMode(hdc, TRANSPARENT);
@@ -858,7 +858,7 @@ BOOL CALLBACK Custom_Game_DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM
         case WM_COMMAND:
             switch(LOWORD(wParam))
             {
-                case IDOK:
+                case IDOK:;
                         TCHAR buff_X[BUFFER_INT] = {0};
                         GetDlgItemText(hwnd, IDE_CUSTOM_X, buff_X, 1024);
                         TCHAR buff_Y[BUFFER_INT] = {0};
@@ -870,9 +870,9 @@ BOOL CALLBACK Custom_Game_DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM
                         int y = 0;
                         int mines = 0;
 
-                        sscanf(buff_X, "%d", &x);
-                        sscanf(buff_Y, "%d", &y);
-                        sscanf(buff_mines, "%d", &mines);
+                        sscanf_s(buff_X, "%d", &x);
+                        sscanf_s(buff_Y, "%d", &y);
+                        sscanf_s(buff_mines, "%d", &mines);
 
                         if(mines < MIN_MINES)														//Check for min values
                         {
@@ -942,7 +942,7 @@ void new_game_board(int x, int y, int mines)
         int ** game_board_int = malloc(x*sizeof(int *));					//Create 2D pointer array of int and allocate memory
         for(int index = 0; index < x; index++)								//Cycle
         {
-                game_board_int[index] = malloc(y*sizeof(int *));				//Allocate memory
+                game_board_int[index] = malloc(y*sizeof(int));				//Allocate memory
         }
 
         for(int index_x = 0; index_x < x; index_x++)						//Cycle All
@@ -952,10 +952,10 @@ void new_game_board(int x, int y, int mines)
                         game_board_int[index_x][index_y] = '0';						//Initialize '0'
                 }
         }
-        int ** flag_board_int = malloc(x*sizeof(int *));					//Create 2D pointer array of int and allocate memory
+        int ** flag_board_int = malloc(x*sizeof(int*));					//Create 2D pointer array of int and allocate memory
         for(int index = 0; index < x; index++)								//Cycle
         {
-                flag_board_int[index] = malloc(y*sizeof(int *));				//Allocate Memory
+                flag_board_int[index] = malloc(y*sizeof(int));				//Allocate Memory
         }
 
         for(int index_x = 0; index_x < x; index_x++)						//Cycle All
