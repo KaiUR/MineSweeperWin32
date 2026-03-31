@@ -42,8 +42,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
-        # Ensure we are on the master branch to apply the change
-        git checkout master
+        git checkout -B master origin/master
         git pull origin master # Keep it sync'd
         
         git add build_number.txt
@@ -62,6 +61,9 @@ jobs:
         
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         echo "Creating release for $FULL_VERSION"
+
+        git tag -d "$BASE_TAG"
+        git push --delete origin "$BASE_TAG"
         
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
           --title "MineSweeper $FULL_VERSION" \
