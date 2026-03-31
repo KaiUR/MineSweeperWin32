@@ -58,6 +58,20 @@ This project uses a custom CMake-driven versioning system:
 *   **Auto-Increment**: Every time CMake is configured, the `build_number.txt` increments.
 *   **Header Generation**: CMake generates `version.h` from `version.h.in`, injecting the current version, build number, and build date into the binary's `VERSIONINFO` resource.
 
+## How to Create a Release
+
+This project uses GitHub Actions to automatically build and create a GitHub Release whenever a new version tag is pushed.
+
+To create a new release:
+
+1. **Create a version tag** (replace `v1.0` with your version):
+   ```bash
+   git tag v1.0
+   
+2. ***Push version tag***
+	'''bash
+	git push origin v1.0
+
 ## 📄 License
 
 This project is licensed under the **MIT License**.
