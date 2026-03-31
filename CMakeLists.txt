@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MineSweeperWin32 VERSION 1.0.0 LANGUAGES C RC)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # --- Build Number Logic ---
 if(EXISTS "${CMAKE_SOURCE_DIR}/build_number.txt")
     file(READ "${CMAKE_SOURCE_DIR}/build_number.txt" BUILD_NUMBER)
