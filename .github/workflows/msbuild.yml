@@ -29,7 +29,7 @@ jobs:
       # -lgdi32 and -luser32 link the Windows libraries you
       # -mwindows ensures it builds as a GUI app
       run: |
-        gcc -O2 *.c -o MineSweeper.exe -luser32 -lgdi32 -mwindows
+        gcc -O2 $(find . -maxdepth 1 -name "*.c") -o MineSweeper.exe -luser32 -lgdi32 -mwindows
 
     - name: Create Release and Upload Assets
       if: startsWith(github.ref, 'refs/tags/')
