@@ -61,12 +61,13 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
       run: |
-        git config --global user.name "${{ steps.import-gpg.outputs.name }}"
-        git config --global user.email "${{ steps.import-gpg.outputs.email }}"
-        git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
-
-        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
-        git config --global commit.gpgsign true
+       commit_author: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
+       commit_user_name: ${{ steps.import-gpg.outputs.name }}
+       commit_user_email: ${{ steps.import-gpg.outputs.email }}
+       commit_message: 'chore: Update mime.types'
+       commit_options: '-S --amend --no-edit'
+       push_options: '--force'
+       skip_fetch: true
         
         git checkout -B master origin/master
         git pull origin master
@@ -74,8 +75,7 @@ jobs:
         git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
-          # Add the -S flag to actually trigger the GPG signature
-          git commit -S -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
+          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
           git push origin master
         fi
         
