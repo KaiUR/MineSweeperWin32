@@ -1,3 +1,6 @@
 # Contributors
 
-Thanks to the following people for helping with MineSweeperWin32:
+Thanks to everyone who has helped with MineSweeperWin32:
+
+* KaiUR
+* github-actions[bot]
