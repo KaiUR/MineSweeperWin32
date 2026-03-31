@@ -40,6 +40,8 @@ set(GAME_DATA
     Data/space_flag.bmp
 )
 
+source_group("Data" FILES ${GAME_DATA})
+
 # --- Executable ---
 add_executable(MineSweeperWin32 WIN32
     src/main.c
