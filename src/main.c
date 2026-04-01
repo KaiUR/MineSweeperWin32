@@ -327,6 +327,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
           }
       break;
+	  
       // Paint graphics to screen
     case WM_PAINT: {
       PAINTSTRUCT ps;
