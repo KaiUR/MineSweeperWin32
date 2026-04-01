@@ -59,41 +59,56 @@ jobs:
 
     - name: Commit and Push Updated Build Number
       if: startsWith(github.ref, 'refs/tags/v')
-      shell: bash
-      run: |
-        git config --global user.name "${{ steps.import-gpg.outputs.name }}"
-        git config --global user.email "${{ steps.import-gpg.outputs.email }}"
-        git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
-
-        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
-        git config --global commit.gpgsign true
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        branch: master
+        file_pattern: 'build_number.txt CONTRIBUTORS.md'
+        commit_message: "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
+        commit_author: "${{ steps.import-gpg.outputs.name }} <${{ steps.import-gpg.outputs.email }}>"
+        commit_user_name: ${{ steps.import-gpg.outputs.name }}
+        commit_user_email: ${{ steps.import-gpg.outputs.email }}
+        commit_options: '--gpg-sign=${{ steps.import-gpg.outputs.keyid }}'
         
-        git checkout -B master origin/master
-        git pull origin master
-        
-        git add build_number.txt CONTRIBUTORS.md
-        
-        if ! git diff --staged --quiet; then
-          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
-          git push origin master
-        fi
-        
-    - name: Create Release and Upload Assets
+    - name: Create Signed Tag and Release
       if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       shell: bash
       run: |
         BASE_TAG=${{ github.ref_name }}
         BUILD_NUM=$(cat build_number.txt)
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         
+        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
+        
         git tag -d "$BASE_TAG" || true
         git push origin --delete "$BASE_TAG" || true
 
-        git tag "$FULL_VERSION" -m "Release $FULL_VERSION"
+        echo "$GPG_PASSPHRASE" | git tag -s "$FULL_VERSION" -m "Release $FULL_VERSION"
+        git push origin "$FULL_VERSION"
+        
+        echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+
+    - name: Create Release and Upload Assets
+      if: startsWith(github.ref, 'refs/tags/v')
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      run: |
+        BASE_TAG=${{ github.ref_name }}
+        BUILD_NUM=$(cat build_number.txt)
+        FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
+        
+        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
+        
+        git tag -d "$BASE_TAG" || true
+        git push origin --delete "$BASE_TAG" || true
+
+        echo "$GPG_PASSPHRASE" | git tag -s "$FULL_VERSION" -m "Release $FULL_VERSION"
         git push origin "$FULL_VERSION"
         
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
           --title "MineSweeper $FULL_VERSION" \
           --generate-notes
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
