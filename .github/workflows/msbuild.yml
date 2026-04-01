@@ -82,6 +82,8 @@ jobs:
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         echo "Creating release for $FULL_VERSION"
 
+        echo "FULL_VERSION=$FULL_VERSION" >> $GITHUB_ENV
+
         git tag -d "$BASE_TAG"
         git push --delete origin "$BASE_TAG"
 
@@ -98,3 +100,4 @@ jobs:
           --target master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        FULL_VERSION: ${{ env.FULL_VERSION }}
