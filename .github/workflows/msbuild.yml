@@ -32,6 +32,10 @@ jobs:
     - name: Update Contributors File
       shell: bash
       run: |
+        git fetch origin master
+        git checkout master
+        git pull origin master
+      
         echo "# Contributors" > CONTRIBUTORS.md
         echo "" >> CONTRIBUTORS.md
         echo "Thanks to everyone who has helped with MineSweeperWin32:" >> CONTRIBUTORS.md
@@ -65,7 +69,8 @@ jobs:
       with:
         message: "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
         files: |
-          **
+          build_number.txt
+          CONTRIBUTORS.md
 
     - name: Update current tag
       if: startsWith(github.ref, 'refs/tags/v')
@@ -81,13 +86,7 @@ jobs:
         git push --delete origin "$BASE_TAG"
 
         git tag "$FULL_VERSION"
-
-    - name: Commit & Push changes build_number contributors
-      uses: iarekylew00t/verified-bot-commit@v2
-      with:
-        message: "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
-        files: |
-          **
+        git push -u origin "$FULL_VERSION"
         
     - name: Update and Release
       if: startsWith(github.ref, 'refs/tags/v')
