@@ -185,13 +185,13 @@ CAPTION "Custom"
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 FONT 9, "MS Sans Serif"
 BEGIN
-   DEFPUSHBUTTON "&OK", IDOK, 65, 79, 50, 11 
-   DEFPUSHBUTTON "&Cancel", IDCANCEL, 130, 79, 50, 11 
-   EDITTEXT IDE_CUSTOM_X, 110, 10, 37, 14 
-   EDITTEXT IDE_CUSTOM_Y, 110, 30, 37, 14 
-   EDITTEXT IDE_CUSTOM_MINES, 110, 50, 37, 14 
-   LTEXT "Enter numer of colums:", IDC_STATIC, 10, 10, 82, 14 
-   LTEXT "Enter numer of mines:", IDC_STATIC, 10, 30, 82, 14 
-   LTEXT "Enter numer of rows:", IDC_STATIC, 10, 50, 82, 14 
-   LTEXT "Enter custom optios for the game:", IDC_STATIC, 160, 10, 80, 60 
+   LTEXT "Enter custom options for the game:", IDC_STATIC, 10, 10, 150, 10 
+   LTEXT "Enter number of columns:", IDC_STATIC, 10, 30, 82, 14 
+   EDITTEXT IDE_CUSTOM_X, 110, 30, 37, 14 
+   LTEXT "Enter number of rows:", IDC_STATIC, 10, 50, 82, 14 
+   EDITTEXT IDE_CUSTOM_Y, 110, 50, 37, 14 
+   LTEXT "Enter number of mines:", IDC_STATIC, 10, 70, 82, 14 
+   EDITTEXT IDE_CUSTOM_MINES, 110, 70, 37, 14 
+   DEFPUSHBUTTON "&OK", IDOK, 65, 95, 50, 11 
+   DEFPUSHBUTTON "&Cancel", IDCANCEL, 130, 95, 50, 11 
 END
