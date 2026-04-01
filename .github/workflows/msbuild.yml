@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
+        
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
       with:
@@ -59,13 +59,8 @@ jobs:
         git pull origin master # Keep it sync'd
         
         git add build_number.txt CONTRIBUTORS.md
-        
-        if ! git diff --staged --quiet; then
-          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
-          git push origin master
-        fi
-        
-    - name: Create Release and Upload Assets
+
+    - name: Update current tag
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
       run: |
@@ -77,7 +72,20 @@ jobs:
 
         git tag -d "$BASE_TAG"
         git push --delete origin "$BASE_TAG"
+
+        git tag "$FULL_VERSION"
+
+    - name: Commit & Push changes build_number contributors
+      uses: iarekylew00t/verified-bot-commit@v2
+      with:
+        message: "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
+        files: |
+          **
         
+    - name: Update and Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      shell: bash
+      run: |
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
           --title "MineSweeper $FULL_VERSION" \
           --generate-notes \
