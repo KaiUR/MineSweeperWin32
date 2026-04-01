@@ -60,6 +60,13 @@ jobs:
         
         git add build_number.txt CONTRIBUTORS.md
 
+    - name: Commit & Push changes build_number contributors
+      uses: iarekylew00t/verified-bot-commit@v2
+      with:
+        message: "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
+        files: |
+          **
+
     - name: Update current tag
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
