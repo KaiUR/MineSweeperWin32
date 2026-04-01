@@ -78,6 +78,7 @@ jobs:
       run: |
         BASE_TAG=${{ github.ref_name }}
         BUILD_NUM=$(cat build_number.txt)
+        BUILD_NUM=$((BUILD_NUM - 1))
         
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         echo "Creating release for $FULL_VERSION"
