@@ -328,149 +328,143 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
           }
       break;
       // Paint graphics to screen
-      case WM_PAINT:;
-          PAINTSTRUCT ps;
+    case WM_PAINT: {
+      PAINTSTRUCT ps;
+      HDC hdc = BeginPaint(hwnd, &ps);
 
-          RECT rcWindow;
-          GetClientRect(hwnd, &rcWindow);
+      RECT rcWindow;
+      GetClientRect(hwnd, &rcWindow);
 
-          BITMAP bm_blank_space;
-          BITMAP bm_blank_space_empty;
-          BITMAP bm_mine_black;
-          BITMAP bm_mine_red;
-          BITMAP bm_space_flag;
-          BITMAP bm_space_numbers[8];
+      // CREATE BACK BUFFER
+      HDC hdcBuffer = CreateCompatibleDC(hdc);
+      HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, rcWindow.right, rcWindow.bottom);
+      HGDIOBJ hOldBuffer = SelectObject(hdcBuffer, hbmBuffer);
 
-          HDC hdc = BeginPaint(hwnd, &ps);
+      // Memory DC for sprites
+      HDC hdcMem = CreateCompatibleDC(hdc);
+      HGDIOBJ hbmOld = NULL;
 
-          HBRUSH hBrush = CreateSolidBrush(window_bgd);
-          FillRect(hdc, &rcWindow, hBrush);
-          DeleteObject(hBrush);
-
-          HDC hdcMem = CreateCompatibleDC(hdc);
-          HGDIOBJ hbmOld = NULL;
-
-          GetObject(blank_space, sizeof(bm_blank_space), &bm_blank_space);
-          GetObject(blank_space_empty, sizeof(bm_blank_space_empty), &bm_blank_space_empty);
-          GetObject(mine_black, sizeof(bm_mine_black), &bm_mine_black);
-          GetObject(mine_red, sizeof(bm_mine_red), &bm_mine_red);
-          GetObject(space_flag, sizeof(bm_space_flag), &bm_space_flag);
-
-          for(int index_get = 0; index_get < 8; index_get++)
-          {
-            GetObject(space_numbers[index_get], sizeof(bm_space_numbers[index_get]), &bm_space_numbers[index_get]);
-          }
-
-          int boardWidth  = game_board.x * BITMAP_PIXEL_X;
-          int boardHeight = game_board.y * BITMAP_PIXEL_Y;
-
-          // Calculate centering offsets
-          int offsetX = (rcWindow.right - boardWidth) / 2;
-          int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
-
-          // Ensure offsets aren't negative if window is too small
-          if (offsetX < 0) offsetX = 0;
-          if (offsetY < 0) offsetY = 0;
-
-          if (play == 1 || game_board.lost > 0) {
-            for (int index_x = 0; index_x < game_board.x; index_x++) {
-              for (int index_y = 0; index_y < game_board.y; index_y++) {
-
-                // Logic for end of game formatting
-                if (game_board.lost == 1) {
-                  if (game_board.l_x == index_x && game_board.l_y == index_y) {
-                    hbmOld = SelectObject(hdcMem, mine_red);
-                    BitBlt(hdc, offsetX + index_x * bm_mine_red.bmWidth, offsetY + index_y * bm_mine_red.bmHeight,
-                    bm_mine_red.bmWidth, bm_mine_red.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                  }
-                  else if (game_board.game_board[index_x][index_y] == 'M') {
-                    hbmOld = SelectObject(hdcMem, mine_black);
-                    BitBlt(hdc, offsetX + index_x * bm_mine_black.bmWidth, offsetY + index_y * bm_mine_black.bmHeight,
-                    bm_mine_black.bmWidth, bm_mine_black.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                  }
-                  else {
-                    if (game_board.game_board[index_x][index_y] == 'B' || game_board.game_board[index_x][index_y] == '0') {
-                      hbmOld = SelectObject(hdcMem, blank_space_empty);
-                      BitBlt(hdc, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
-                      bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                    }
-                    if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
-                      int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
-                      hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
-                      BitBlt(hdc, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
-                      bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
-                    }
-                  }
-                }
-                // Logic for active gameplay
-                else if (game_board.flag_board[index_x][index_y] == 'F') {
-                  hbmOld = SelectObject(hdcMem, space_flag);
-                  BitBlt(hdc, offsetX + index_x * bm_space_flag.bmWidth, offsetY + index_y * bm_space_flag.bmHeight,
-                  bm_space_flag.bmWidth, bm_space_flag.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                }
-                else if (game_board.game_board[index_x][index_y] != 'M') {
-                  if (game_board.game_board[index_x][index_y] == 'B') {
-                    hbmOld = SelectObject(hdcMem, blank_space_empty);
-                    BitBlt(hdc, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
-                    bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                  }
-                  if (game_board.game_board[index_x][index_y] == '0') {
-                    hbmOld = SelectObject(hdcMem, blank_space);
-                    BitBlt(hdc, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
-                    bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                  }
-                  if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
-                    int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
-                    hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
-                    BitBlt(hdc, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
-                    bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
-                  }
-                }
-                else {
-                  hbmOld = SelectObject(hdcMem, blank_space);
-                  BitBlt(hdc, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
-                  bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                }
-              }
-            }
-
-            // Draw UI background and Text
-            HGDIOBJ original = SelectObject(hdc, GetStockObject(DC_PEN));
-            SelectObject(hdc, GetStockObject(DC_BRUSH));
-            SetDCBrushColor(hdc, window_bgd);
-            SetDCPenColor(hdc, window_bgd);
-
-            // Simple background clear for UI area
-            Rectangle(hdc, 0, game_board.y * BITMAP_PIXEL_Y + offsetY, rcWindow.right, rcWindow.bottom);
-
-            char message_str[30];
-            wsprintf(message_str, "Mines remaining: %d", game_board.remain_mines);
-            SetTextColor(hdc, mines_rgbText);
-            SetBkMode(hdc, TRANSPARENT);
-            TextOut(hdc, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y, message_str, strlen(message_str));
-
-            unsigned long hours = timer_value / 3600;
-            unsigned long mins = (timer_value - (hours * 3600)) / 60;
-            unsigned long secs = timer_value - (hours * 3600) - (mins * 60);
-
-            char message_str_timer[30];
-            wsprintf(message_str_timer, "Time: %02lu:%02lu:%02lu", hours, mins, secs);
-            SetTextColor(hdc, timer_rgbText);
-            TextOut(hdc, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y + 20, message_str_timer, strlen(message_str_timer));
-
-            SelectObject(hdc, original);
-    }
-    else {
-      // Clear background if not playing
+      // Clear the back buffer background
       HBRUSH hBrush = CreateSolidBrush(window_bgd);
-      FillRect(hdc, &rcWindow, hBrush);
+      FillRect(hdcBuffer, &rcWindow, hBrush);
       DeleteObject(hBrush);
+
+      BITMAP bm_blank_space;
+      BITMAP bm_blank_space_empty;
+      BITMAP bm_mine_black;
+      BITMAP bm_mine_red;
+      BITMAP bm_space_flag;
+      BITMAP bm_space_numbers[8];
+
+      GetObject(blank_space, sizeof(bm_blank_space), &bm_blank_space);
+      GetObject(blank_space_empty, sizeof(bm_blank_space_empty), &bm_blank_space_empty);
+      GetObject(mine_black, sizeof(bm_mine_black), &bm_mine_black);
+      GetObject(mine_red, sizeof(bm_mine_red), &bm_mine_red);
+      GetObject(space_flag, sizeof(bm_space_flag), &bm_space_flag);
+
+      for (int index_get = 0; index_get < 8; index_get++) {
+        GetObject(space_numbers[index_get], sizeof(bm_space_numbers[index_get]), &bm_space_numbers[index_get]);
+      }
+
+      int boardWidth = game_board.x * BITMAP_PIXEL_X;
+      int boardHeight = game_board.y * BITMAP_PIXEL_Y;
+
+      int offsetX = (rcWindow.right - boardWidth) / 2;
+      int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
+      if (offsetX < 0) offsetX = 0;
+      if (offsetY < 0) offsetY = 0;
+
+      if (play == 1 || game_board.lost > 0) {
+    for (int index_x = 0; index_x < game_board.x; index_x++) {
+        for (int index_y = 0; index_y < game_board.y; index_y++) {
+
+        // Logic for end of game
+        if (game_board.lost == 1) {
+          if (game_board.l_x == index_x && game_board.l_y == index_y) {
+            hbmOld = SelectObject(hdcMem, mine_red);
+            BitBlt(hdcBuffer, offsetX + index_x * bm_mine_red.bmWidth, offsetY + index_y * bm_mine_red.bmHeight,
+            bm_mine_red.bmWidth, bm_mine_red.bmHeight, hdcMem, 0, 0, SRCCOPY);
+          }
+          else if (game_board.game_board[index_x][index_y] == 'M') {
+            hbmOld = SelectObject(hdcMem, mine_black);
+            BitBlt(hdcBuffer, offsetX + index_x * bm_mine_black.bmWidth, offsetY + index_y * bm_mine_black.bmHeight,
+            bm_mine_black.bmWidth, bm_mine_black.bmHeight, hdcMem, 0, 0, SRCCOPY);
+          }
+          else {
+            if (game_board.game_board[index_x][index_y] == 'B' || game_board.game_board[index_x][index_y] == '0') {
+              hbmOld = SelectObject(hdcMem, blank_space_empty);
+              BitBlt(hdcBuffer, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
+              bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
+            }
+            if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
+              int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
+              hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
+              BitBlt(hdcBuffer, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
+              bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
+            }
+          }
+        }
+          // Logic for active gameplay
+          else if (game_board.flag_board[index_x][index_y] == 'F') {
+            hbmOld = SelectObject(hdcMem, space_flag);
+            BitBlt(hdcBuffer, offsetX + index_x * bm_space_flag.bmWidth, offsetY + index_y * bm_space_flag.bmHeight,
+            bm_space_flag.bmWidth, bm_space_flag.bmHeight, hdcMem, 0, 0, SRCCOPY);
+          }
+          else if (game_board.game_board[index_x][index_y] != 'M') {
+              if (game_board.game_board[index_x][index_y] == 'B') {
+                hbmOld = SelectObject(hdcMem, blank_space_empty);
+                BitBlt(hdcBuffer, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
+                bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
+              }
+              if (game_board.game_board[index_x][index_y] == '0') {
+                hbmOld = SelectObject(hdcMem, blank_space);
+                BitBlt(hdcBuffer, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
+                bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
+              }
+              if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
+                int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
+                hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
+                BitBlt(hdcBuffer, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
+                bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
+              }
+          }
+          else {
+            hbmOld = SelectObject(hdcMem, blank_space);
+            BitBlt(hdcBuffer, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
+            bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
+          }
+        }
     }
 
-    // CLEANUP: Unselect bitmap and delete the SINGLE memory DC
+      // Draw UI text to buffer
+      char message_str[30];
+      wsprintf(message_str, "Mines remaining: %d", game_board.remain_mines);
+      SetTextColor(hdcBuffer, mines_rgbText);
+      SetBkMode(hdcBuffer, TRANSPARENT);
+      TextOut(hdcBuffer, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y, message_str, strlen(message_str));
+
+      unsigned long hours = timer_value / 3600;
+      unsigned long mins = (timer_value - (hours * 3600)) / 60;
+      unsigned long secs = timer_value - (hours * 3600) - (mins * 60);
+
+      char message_str_timer[30];
+      wsprintf(message_str_timer, "Time: %02lu:%02lu:%02lu", hours, mins, secs);
+      SetTextColor(hdcBuffer, timer_rgbText);
+      TextOut(hdcBuffer, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y + 20, message_str_timer, strlen(message_str_timer));
+    }
+
+    // Copy the entire buffer to the screen at once
+    BitBlt(hdc, 0, 0, rcWindow.right, rcWindow.bottom, hdcBuffer, 0, 0, SRCCOPY);
+
+    // CLEANUP
     SelectObject(hdcMem, hbmOld);
     DeleteDC(hdcMem);
+    SelectObject(hdcBuffer, hOldBuffer);
+    DeleteObject(hbmBuffer);
+    DeleteDC(hdcBuffer);
+
     EndPaint(hwnd, &ps);
+    }
     break;
 
     //Reduce flickering
