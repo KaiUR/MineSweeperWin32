@@ -74,7 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   game_board.first_start = 1;
   play = 0;
 
-      //Window creation settings
+  //Window creation settings
   WNDCLASSEX wc;
   HWND hwnd;
   MSG Msg;
@@ -141,603 +141,610 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   switch(msg)
   {
-      //Window Menu
-      case WM_COMMAND:
-              switch(LOWORD(wParam))
+    //Window Menu
+    case WM_COMMAND:
+      switch(LOWORD(wParam))
+      {
+        //Exit
+        case ID_FILE_EXIT:
+          PostMessage(hwnd, WM_CLOSE, 0, 0);
+          break;
+        //Start New Game
+        case ID_FILE_NEW_GAME:;
+          //Get Current window position
+          RECT Rect;
+          GetWindowRect(hwnd, &Rect);
+          //New Game options
+          int ret_new_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_NEW_GAME), hwnd, (DLGPROC)New_Game_DlgProc);
+          if(ret_new_game == -1)
+          {
+            MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+            PostMessage(hwnd, WM_CLOSE, 0, 0);
+          }
+          //Setup Game for easy options
+          else if(ret_new_game == IDP_EASY)
+          {
+            new_game_board(EASY_X, EASY_Y, EASY_MINES);
+            game_board.first_start = 1;
+            play = 1;
+            int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
+            if(ret_timer == 0)
+            {
+              MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
+            }
+            timer_value = 0;
+            SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+EASY_X*PIXEL_X, INDENT_Y+EASY_Y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
+            InvalidateRect(hwnd, 0, TRUE);
+          }
+          //Setup game for normal options
+          else if(ret_new_game == IDP_NORMAL)
+          {
+            new_game_board(NORMAL_X, NORMAL_Y, NORMAL_MINES);
+            game_board.first_start = 1;
+            play = 1;
+            int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
+            if(ret_timer == 0)
+            {
+              MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
+            }
+            timer_value = 0;
+            SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+NORMAL_X*PIXEL_X, INDENT_Y+NORMAL_Y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
+            InvalidateRect(hwnd, 0, TRUE);
+          }
+          //Setup game for hard options
+          else if(ret_new_game == IDP_HARD)
+          {
+            new_game_board(HARD_X, HARD_Y, HARD_MINES);
+            game_board.first_start = 1;
+            play = 1;
+            int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
+            if(ret_timer == 0)
+            {
+              MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
+            }
+            timer_value = 0;
+            SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+HARD_X*PIXEL_X, INDENT_Y+HARD_Y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
+            InvalidateRect(hwnd, 0, TRUE);
+          }
+          //Setup game for custom options
+          else if(ret_new_game == IDP_CUSTOM)
+          {
+            int ret_custom_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_CUSTOM_GAME), hwnd, (DLGPROC)Custom_Game_DlgProc);
+            if(ret_custom_game == -1)
+            {
+              MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+              PostMessage(hwnd, WM_CLOSE, 0, 0);
+            }
+            else if( ret_custom_game == IDOK)
+            {
+              new_game_board(custom_x, custom_y, custom_mines);
+              game_board.first_start = 1;
+              play = 1;
+              int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
+              if(ret_timer == 0)
               {
-                      //Exit
-              case ID_FILE_EXIT:
-                      PostMessage(hwnd, WM_CLOSE, 0, 0);
-                      break;
-              //Start New Game
-              case ID_FILE_NEW_GAME:;
-                      //Get Current window position
-                              RECT Rect;
-                              GetWindowRect(hwnd, &Rect);
-                              //New Game options
-                  int ret_new_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_NEW_GAME), hwnd, (DLGPROC)New_Game_DlgProc);
-                  if(ret_new_game == -1)
-                  {
-                      MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-                      PostMessage(hwnd, WM_CLOSE, 0, 0);
-                  }
-                  //Setup Game for easy options
-                  else if(ret_new_game == IDP_EASY)
-                  {
-                      new_game_board(EASY_X, EASY_Y, EASY_MINES);
-                      game_board.first_start = 1;
-                      play = 1;
-                      int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
-                      if(ret_timer == 0)
-                      {
-                          MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
-                      }
-                      timer_value = 0;
-                      SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+EASY_X*PIXEL_X, INDENT_Y+EASY_Y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
-                      InvalidateRect(hwnd, 0, TRUE);
-                  }
-                  //Setup game for normal options
-                  else if(ret_new_game == IDP_NORMAL)
-                  {
-                      new_game_board(NORMAL_X, NORMAL_Y, NORMAL_MINES);
-                      game_board.first_start = 1;
-                      play = 1;
-                      int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
-                      if(ret_timer == 0)
-                      {
-                          MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
-                      }
-                      timer_value = 0;
-                      SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+NORMAL_X*PIXEL_X, INDENT_Y+NORMAL_Y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
-                      InvalidateRect(hwnd, 0, TRUE);
-                  }
-                  //Setup game for hard options
-                  else if(ret_new_game == IDP_HARD)
-                  {
-                      new_game_board(HARD_X, HARD_Y, HARD_MINES);
-                      game_board.first_start = 1;
-                      play = 1;
-                      int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
-                      if(ret_timer == 0)
-                      {
-                          MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
-                      }
-                      timer_value = 0;
-                      SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+HARD_X*PIXEL_X, INDENT_Y+HARD_Y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
-                      InvalidateRect(hwnd, 0, TRUE);
-                  }
-                  //Setup game for custom options
-                  else if(ret_new_game == IDP_CUSTOM)
-                  {
-                      int ret_custom_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_CUSTOM_GAME), hwnd, (DLGPROC)Custom_Game_DlgProc);
-                      if(ret_custom_game == -1)
-                      {
-                          MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-                          PostMessage(hwnd, WM_CLOSE, 0, 0);
-                      }
-                      else if( ret_custom_game == IDOK)
-                      {
-                              new_game_board(custom_x, custom_y, custom_mines);
-                              game_board.first_start = 1;
-                              play = 1;
-                          int ret_timer = SetTimer(hwnd, ID_TIMER, TIME_INTERVAL, NULL);
-                          if(ret_timer == 0)
-                          {
-                              MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
-                          }
-                          timer_value = 0;
-                              SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+custom_x*PIXEL_X, INDENT_Y+custom_y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
-                              InvalidateRect(hwnd, 0, TRUE);
-                      }
-                  }
-                  break;
-              //Allows to replay last game
-              case ID_FILE_REPLAY_GAME:;
-                  int ret_replay_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_REPLAY_GAME), hwnd, (DLGPROC)STD_DlgProc);
-                  if(ret_replay_game == -1)
-                  {
-                      MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-                      PostMessage(hwnd, WM_CLOSE, 0, 0);
-                  }
-                  else if(ret_replay_game == IDOK)
-                  {
-                      //Check if there was previous game
-                      if(game_board.first_start == 1)
-                      {
-                              break;
-                      }
-                      play = 1;
-                      game_board.lost = 0;
-                      game_board.remain_mines = game_board.mines;
-                      //Cover up the board
-                      for( int index_x = 0; index_x < game_board.x; index_x++)			//Cycle
-                      {
-                              for(int index_y = 0; index_y < game_board.y; index_y++)			//Cycle
-                              {
-                                      if(game_board.game_board[index_x][index_y] == 'B')			//Reset 'B' to '0'
-                                      {
-                                              game_board.game_board[index_x][index_y] = '0';
-                                      }
-                                      if(game_board.game_board[index_x][index_y] >= '1' && game_board.game_board[index_x][index_y] < '9')	//Reset numbers to '0'
-                                      {
-                                              game_board.game_board[index_x][index_y] = '0';
-                                      }
-                                      if(game_board.flag_board[index_x][index_y] == 'F')
-                                      {
-                                              game_board.flag_board[index_x][index_y] = '0';
-                                      }
-                              }
-                      }
-                      InvalidateRect(hwnd, 0, TRUE);
-                  }
-                      break;
-              //Shows helptext
-              case ID_HELP_HELP:;
-                  int ret_help = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HELP), hwnd, (DLGPROC)STD_DlgProc);
-                  if(ret_help == -1)
-                  {
-                      MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-                      PostMessage(hwnd, WM_CLOSE, 0, 0);
-                  }
-                      break;
-              //Shows about text
-              case ID_HELP_ABOUT:;
-                  int ret_about = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, (DLGPROC)STD_DlgProc);
-                  if(ret_about == -1)
-                  {
-                      MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-                      PostMessage(hwnd, WM_CLOSE, 0, 0);
-                  }
-                      break;
+                MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
               }
+              timer_value = 0;
+              SetWindowPos(hwnd, 0, Rect.left, Rect.top, INDENT_X+custom_x*PIXEL_X, INDENT_Y+custom_y*PIXEL_Y+PIXEL_Y, SWP_SHOWWINDOW);
+              InvalidateRect(hwnd, 0, TRUE);
+            }
+          }
+          break;
+          //Allows to replay last game
+          case ID_FILE_REPLAY_GAME:;
+              int ret_replay_game = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_REPLAY_GAME), hwnd, (DLGPROC)STD_DlgProc);
+              if(ret_replay_game == -1)
+              {
+                MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+                PostMessage(hwnd, WM_CLOSE, 0, 0);
+              }
+              else if(ret_replay_game == IDOK)
+              {
+                //Check if there was previous game
+                if(game_board.first_start == 1)
+                {
+                  break;
+                }
+                play = 1;
+                game_board.lost = 0;
+                game_board.remain_mines = game_board.mines;
+                //Cover up the board
+                for( int index_x = 0; index_x < game_board.x; index_x++)//Cycle
+                {
+                  for(int index_y = 0; index_y < game_board.y; index_y++)//Cycle
+                  {
+                    if(game_board.game_board[index_x][index_y] == 'B')//Reset 'B' to '0'
+                    {
+                      game_board.game_board[index_x][index_y] = '0';
+                    }
+                    if(game_board.game_board[index_x][index_y] >= '1' && game_board.game_board[index_x][index_y] < '9')	//Reset numbers to '0'
+                    {
+                       game_board.game_board[index_x][index_y] = '0';
+                    }
+                    if(game_board.flag_board[index_x][index_y] == 'F')
+                    {
+                      game_board.flag_board[index_x][index_y] = '0';
+                    }
+                  }
+                }
+                  InvalidateRect(hwnd, 0, TRUE);
+              }
+              break;
+          //Shows helptext
+          case ID_HELP_HELP:;
+              int ret_help = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HELP), hwnd, (DLGPROC)STD_DlgProc);
+              if(ret_help == -1)
+              {
+                MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+                PostMessage(hwnd, WM_CLOSE, 0, 0);
+              }
+              break;
+          //Shows about text
+          case ID_HELP_ABOUT:;
+              int ret_about = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, (DLGPROC)STD_DlgProc);
+              if(ret_about == -1)
+              {
+                MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+                PostMessage(hwnd, WM_CLOSE, 0, 0);
+              }
+              break;
+          }
       break;
       //Creates assets for program
       case WM_CREATE:
-              blank_space = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BLANK_SPACE));
+          blank_space = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BLANK_SPACE));
           if(blank_space == NULL)
           {
-              MessageBox(hwnd, "Could not load blank_space", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(hwnd, "Could not load blank_space", "Error", MB_OK | MB_ICONEXCLAMATION);
           }
-              blank_space_empty = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BLANK_SPACE_EMPTY));
+          blank_space_empty = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BLANK_SPACE_EMPTY));
           if(blank_space_empty == NULL)
           {
-              MessageBox(hwnd, "Could not load blank_space_empty", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(hwnd, "Could not load blank_space_empty", "Error", MB_OK | MB_ICONEXCLAMATION);
           }
-              mine_black = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_MINE_BLACK));
+          mine_black = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_MINE_BLACK));
           if(mine_black == NULL)
           {
-              MessageBox(hwnd, "Could not load mine_black", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(hwnd, "Could not load mine_black", "Error", MB_OK | MB_ICONEXCLAMATION);
           }
-              mine_red = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_MINE_RED));
+          mine_red = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_MINE_RED));
           if(mine_red == NULL)
           {
-              MessageBox(hwnd, "Could not load mine_red", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(hwnd, "Could not load mine_red", "Error", MB_OK | MB_ICONEXCLAMATION);
           }
-              space_flag = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_SPACE_FLAG));
+          space_flag = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_SPACE_FLAG));
           if(space_flag == NULL)
           {
-              MessageBox(hwnd, "Could not load sapce_flag", "Error", MB_OK | MB_ICONEXCLAMATION);
+            MessageBox(hwnd, "Could not load sapce_flag", "Error", MB_OK | MB_ICONEXCLAMATION);
           }
           for(int index_create = 0; index_create < 8; index_create++)
           {
-              space_numbers[index_create] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_SPACE_1 + index_create));
-              if(space_numbers[index_create] == NULL)
-              {
-                  MessageBox(hwnd, "Could not load sapce_number", "Error", MB_OK | MB_ICONEXCLAMATION);
-              }
+            space_numbers[index_create] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_SPACE_1 + index_create));
+            if(space_numbers[index_create] == NULL)
+            {
+              MessageBox(hwnd, "Could not load sapce_number", "Error", MB_OK | MB_ICONEXCLAMATION);
+            }
           }
       break;
       // Paint graphics to screen
       case WM_PAINT:;
-                      PAINTSTRUCT ps;
+          PAINTSTRUCT ps;
 
-                      RECT rcWindow;
-                      GetClientRect(hwnd, &rcWindow);
+          RECT rcWindow;
+          GetClientRect(hwnd, &rcWindow);
 
-                      BITMAP bm_blank_space;
-                      BITMAP bm_blank_space_empty;
-                      BITMAP bm_mine_black;
-                      BITMAP bm_mine_red;
-                      BITMAP bm_space_flag;
-                      BITMAP bm_space_numbers[8];
+          BITMAP bm_blank_space;
+          BITMAP bm_blank_space_empty;
+          BITMAP bm_mine_black;
+          BITMAP bm_mine_red;
+          BITMAP bm_space_flag;
+          BITMAP bm_space_numbers[8];
 
-                      HDC hdc = BeginPaint(hwnd, &ps);
+          HDC hdc = BeginPaint(hwnd, &ps);
 
-                      HBRUSH hBrush = CreateSolidBrush(window_bgd);
-                      FillRect(hdc, &rcWindow, hBrush);
-                      DeleteObject(hBrush);
+          HBRUSH hBrush = CreateSolidBrush(window_bgd);
+          FillRect(hdc, &rcWindow, hBrush);
+          DeleteObject(hBrush);
 
-                      HDC hdcMem = CreateCompatibleDC(hdc);
-                      HGDIOBJ hbmOld = NULL;
+          HDC hdcMem = CreateCompatibleDC(hdc);
+          HGDIOBJ hbmOld = NULL;
 
-                      GetObject(blank_space, sizeof(bm_blank_space), &bm_blank_space);
-                      GetObject(blank_space_empty, sizeof(bm_blank_space_empty), &bm_blank_space_empty);
-                      GetObject(mine_black, sizeof(bm_mine_black), &bm_mine_black);
-                      GetObject(mine_red, sizeof(bm_mine_red), &bm_mine_red);
-                      GetObject(space_flag, sizeof(bm_space_flag), &bm_space_flag);
+          GetObject(blank_space, sizeof(bm_blank_space), &bm_blank_space);
+          GetObject(blank_space_empty, sizeof(bm_blank_space_empty), &bm_blank_space_empty);
+          GetObject(mine_black, sizeof(bm_mine_black), &bm_mine_black);
+          GetObject(mine_red, sizeof(bm_mine_red), &bm_mine_red);
+          GetObject(space_flag, sizeof(bm_space_flag), &bm_space_flag);
 
-                      for(int index_get = 0; index_get < 8; index_get++)
-                      {
-                                      GetObject(space_numbers[index_get], sizeof(bm_space_numbers[index_get]), &bm_space_numbers[index_get]);
-                      }
+          for(int index_get = 0; index_get < 8; index_get++)
+          {
+            GetObject(space_numbers[index_get], sizeof(bm_space_numbers[index_get]), &bm_space_numbers[index_get]);
+          }
 
-                      int boardWidth  = game_board.x * BITMAP_PIXEL_X;
-                      int boardHeight = game_board.y * BITMAP_PIXEL_Y;
+          int boardWidth  = game_board.x * BITMAP_PIXEL_X;
+          int boardHeight = game_board.y * BITMAP_PIXEL_Y;
 
-                      // Calculate centering offsets
-                      int offsetX = (rcWindow.right - boardWidth) / 2;
-                      int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
+          // Calculate centering offsets
+          int offsetX = (rcWindow.right - boardWidth) / 2;
+          int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
 
-                      // Ensure offsets aren't negative if window is too small
-                      if (offsetX < 0) offsetX = 0;
-                      if (offsetY < 0) offsetY = 0;
+          // Ensure offsets aren't negative if window is too small
+          if (offsetX < 0) offsetX = 0;
+          if (offsetY < 0) offsetY = 0;
 
-                      if (play == 1 || game_board.lost > 0) {
-                                      for (int index_x = 0; index_x < game_board.x; index_x++) {
-                                              for (int index_y = 0; index_y < game_board.y; index_y++) {
+          if (play == 1 || game_board.lost > 0) {
+            for (int index_x = 0; index_x < game_board.x; index_x++) {
+              for (int index_y = 0; index_y < game_board.y; index_y++) {
 
-                                                      // Logic for end of game formatting
-                                                      if (game_board.lost == 1) {
-                                                              if (game_board.l_x == index_x && game_board.l_y == index_y) {
-                                                                      hbmOld = SelectObject(hdcMem, mine_red);
-                                                                      BitBlt(hdc, offsetX + index_x * bm_mine_red.bmWidth, offsetY + index_y * bm_mine_red.bmHeight,
-                                                                                     bm_mine_red.bmWidth, bm_mine_red.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                              }
-                                                              else if (game_board.game_board[index_x][index_y] == 'M') {
-                                                                      hbmOld = SelectObject(hdcMem, mine_black);
-                                                                      BitBlt(hdc, offsetX + index_x * bm_mine_black.bmWidth, offsetY + index_y * bm_mine_black.bmHeight,
-                                                                                     bm_mine_black.bmWidth, bm_mine_black.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                              }
-                                                              else {
-                                                                      if (game_board.game_board[index_x][index_y] == 'B' || game_board.game_board[index_x][index_y] == '0') {
-                                                                              hbmOld = SelectObject(hdcMem, blank_space_empty);
-                                                                              BitBlt(hdc, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
-                                                                                             bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                                      }
-                                                                      if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
-                                                                              int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
-                                                                              hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
-                                                                              BitBlt(hdc, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
-                                                                                             bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                                      }
-                                                              }
-                                                      }
-                                                      // Logic for active gameplay
-                                                      else if (game_board.flag_board[index_x][index_y] == 'F') {
-                                                              hbmOld = SelectObject(hdcMem, space_flag);
-                                                              BitBlt(hdc, offsetX + index_x * bm_space_flag.bmWidth, offsetY + index_y * bm_space_flag.bmHeight,
-                                                                             bm_space_flag.bmWidth, bm_space_flag.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                      }
-                                                      else if (game_board.game_board[index_x][index_y] != 'M') {
-                                                              if (game_board.game_board[index_x][index_y] == 'B') {
-                                                                      hbmOld = SelectObject(hdcMem, blank_space_empty);
-                                                                      BitBlt(hdc, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
-                                                                                     bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                              }
-                                                              if (game_board.game_board[index_x][index_y] == '0') {
-                                                                      hbmOld = SelectObject(hdcMem, blank_space);
-                                                                      BitBlt(hdc, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
-                                                                                     bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                              }
-                                                              if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
-                                                                      int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
-                                                                      hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
-                                                                      BitBlt(hdc, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
-                                                                                     bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                              }
-                                                      }
-                                                      else {
-                                                              hbmOld = SelectObject(hdcMem, blank_space);
-                                                              BitBlt(hdc, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
-                                                                             bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
-                                                      }
-                                              }
-                                      }
+                // Logic for end of game formatting
+                if (game_board.lost == 1) {
+                  if (game_board.l_x == index_x && game_board.l_y == index_y) {
+                    hbmOld = SelectObject(hdcMem, mine_red);
+                    BitBlt(hdc, offsetX + index_x * bm_mine_red.bmWidth, offsetY + index_y * bm_mine_red.bmHeight,
+                    bm_mine_red.bmWidth, bm_mine_red.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                  }
+                  else if (game_board.game_board[index_x][index_y] == 'M') {
+                    hbmOld = SelectObject(hdcMem, mine_black);
+                    BitBlt(hdc, offsetX + index_x * bm_mine_black.bmWidth, offsetY + index_y * bm_mine_black.bmHeight,
+                    bm_mine_black.bmWidth, bm_mine_black.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                  }
+                  else {
+                    if (game_board.game_board[index_x][index_y] == 'B' || game_board.game_board[index_x][index_y] == '0') {
+                      hbmOld = SelectObject(hdcMem, blank_space_empty);
+                      BitBlt(hdc, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
+                      bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                    }
+                    if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
+                      int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
+                      hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
+                      BitBlt(hdc, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
+                      bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
+                    }
+                  }
+                }
+                // Logic for active gameplay
+                else if (game_board.flag_board[index_x][index_y] == 'F') {
+                  hbmOld = SelectObject(hdcMem, space_flag);
+                  BitBlt(hdc, offsetX + index_x * bm_space_flag.bmWidth, offsetY + index_y * bm_space_flag.bmHeight,
+                  bm_space_flag.bmWidth, bm_space_flag.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                }
+                else if (game_board.game_board[index_x][index_y] != 'M') {
+                  if (game_board.game_board[index_x][index_y] == 'B') {
+                    hbmOld = SelectObject(hdcMem, blank_space_empty);
+                    BitBlt(hdc, offsetX + index_x * bm_blank_space_empty.bmWidth, offsetY + index_y * bm_blank_space_empty.bmHeight,
+                    bm_blank_space_empty.bmWidth, bm_blank_space_empty.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                  }
+                  if (game_board.game_board[index_x][index_y] == '0') {
+                    hbmOld = SelectObject(hdcMem, blank_space);
+                    BitBlt(hdc, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
+                    bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                  }
+                  if (game_board.game_board[index_x][index_y] > '0' && game_board.game_board[index_x][index_y] < '9') {
+                    int num_idx = game_board.game_board[index_x][index_y] - 1 - '0';
+                    hbmOld = SelectObject(hdcMem, space_numbers[num_idx]);
+                    BitBlt(hdc, offsetX + index_x * bm_space_numbers[num_idx].bmWidth, offsetY + index_y * bm_space_numbers[num_idx].bmHeight,
+                    bm_space_numbers[num_idx].bmWidth, bm_space_numbers[num_idx].bmHeight, hdcMem, 0, 0, SRCCOPY);
+                  }
+                }
+                else {
+                  hbmOld = SelectObject(hdcMem, blank_space);
+                  BitBlt(hdc, offsetX + index_x * bm_blank_space.bmWidth, offsetY + index_y * bm_blank_space.bmHeight,
+                  bm_blank_space.bmWidth, bm_blank_space.bmHeight, hdcMem, 0, 0, SRCCOPY);
+                }
+              }
+            }
 
-                                      // Draw UI background and Text
-                                      HGDIOBJ original = SelectObject(hdc, GetStockObject(DC_PEN));
-                                      SelectObject(hdc, GetStockObject(DC_BRUSH));
-                                      SetDCBrushColor(hdc, window_bgd);
-                                      SetDCPenColor(hdc, window_bgd);
+            // Draw UI background and Text
+            HGDIOBJ original = SelectObject(hdc, GetStockObject(DC_PEN));
+            SelectObject(hdc, GetStockObject(DC_BRUSH));
+            SetDCBrushColor(hdc, window_bgd);
+            SetDCPenColor(hdc, window_bgd);
 
-                                      // Simple background clear for UI area
-                                      Rectangle(hdc, 0, game_board.y * BITMAP_PIXEL_Y + offsetY, rcWindow.right, rcWindow.bottom);
+            // Simple background clear for UI area
+            Rectangle(hdc, 0, game_board.y * BITMAP_PIXEL_Y + offsetY, rcWindow.right, rcWindow.bottom);
 
-                                      char message_str[30];
-                                      wsprintf(message_str, "Mines remaining: %d", game_board.remain_mines);
-                                      SetTextColor(hdc, mines_rgbText);
-                                      SetBkMode(hdc, TRANSPARENT);
-                                      TextOut(hdc, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y, message_str, strlen(message_str));
+            char message_str[30];
+            wsprintf(message_str, "Mines remaining: %d", game_board.remain_mines);
+            SetTextColor(hdc, mines_rgbText);
+            SetBkMode(hdc, TRANSPARENT);
+            TextOut(hdc, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y, message_str, strlen(message_str));
 
-                                      unsigned long hours = timer_value / 3600;
-                                      unsigned long mins = (timer_value - (hours * 3600)) / 60;
-                                      unsigned long secs = timer_value - (hours * 3600) - (mins * 60);
+            unsigned long hours = timer_value / 3600;
+            unsigned long mins = (timer_value - (hours * 3600)) / 60;
+            unsigned long secs = timer_value - (hours * 3600) - (mins * 60);
 
-                                      char message_str_timer[30];
-                                      wsprintf(message_str_timer, "Time: %02lu:%02lu:%02lu", hours, mins, secs);
-                                      SetTextColor(hdc, timer_rgbText);
-                                      TextOut(hdc, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y + 20, message_str_timer, strlen(message_str_timer));
+            char message_str_timer[30];
+            wsprintf(message_str_timer, "Time: %02lu:%02lu:%02lu", hours, mins, secs);
+            SetTextColor(hdc, timer_rgbText);
+            TextOut(hdc, offsetX + 10, offsetY + game_board.y * BITMAP_PIXEL_Y + 20, message_str_timer, strlen(message_str_timer));
 
-                                      SelectObject(hdc, original);
-                              }
-                              else {
-                                      // Clear background if not playing
-                                      HBRUSH hBrush = CreateSolidBrush(window_bgd);
-                                      FillRect(hdc, &rcWindow, hBrush);
-                                      DeleteObject(hBrush);
-                              }
+            SelectObject(hdc, original);
+    }
+    else {
+      // Clear background if not playing
+      HBRUSH hBrush = CreateSolidBrush(window_bgd);
+      FillRect(hdc, &rcWindow, hBrush);
+      DeleteObject(hBrush);
+    }
 
-                              // CLEANUP: Unselect bitmap and delete the SINGLE memory DC
-                              SelectObject(hdcMem, hbmOld);
-                              DeleteDC(hdcMem);
-                              EndPaint(hwnd, &ps);
-                              break;
-      //Reduce flickering
-      case WM_ERASEBKGND:
+    // CLEANUP: Unselect bitmap and delete the SINGLE memory DC
+    SelectObject(hdcMem, hbmOld);
+    DeleteDC(hdcMem);
+    EndPaint(hwnd, &ps);
+    break;
+
+    //Reduce flickering
+    case WM_ERASEBKGND:
+    {
+        return TRUE;
+    }
+
+    //Left click to play
+    case WM_LBUTTONDOWN:
+      if(play == 1)
       {
-          return TRUE;
-      }
-      //Left click to play
-      case WM_LBUTTONDOWN:
-              if(play == 1)
+        POINT mouse_point;
+
+        int x = 0;
+        int y = 0;
+
+        RECT rcWindow;
+        GetClientRect(hwnd, &rcWindow);
+
+        int boardWidth  = game_board.x * BITMAP_PIXEL_X;
+        int boardHeight = game_board.y * BITMAP_PIXEL_Y;
+
+        // Calculate centering offsets
+        int offsetX = (rcWindow.right - boardWidth) / 2;
+        int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
+
+        // Ensure offsets aren't negative if window is too small
+        if (offsetX < 0) offsetX = 0;
+        if (offsetY < 0) offsetY = 0;
+
+        GetCursorPos(&mouse_point);
+        ScreenToClient(hwnd, &mouse_point);
+
+        if (mouse_point.x < offsetX || mouse_point.y < offsetY)
+        {
+          break;
+        }
+
+        x = (mouse_point.x-offsetX) / BITMAP_PIXEL_X;
+        y = (mouse_point.y-offsetY) / BITMAP_PIXEL_Y;
+
+        if(x >= game_board.x || y >= game_board.y || x < 0 || y < 0)
+        {
+          break;
+        }
+
+        if(game_board.flag_board[x][y] == 'F')
+        {
+          break;
+        }
+
+        if(game_board.first_start == 1)
+        {
+          game_board.first_start = 0;
+
+          time_t t;//Time variable for rand() seed
+          int mines = game_board.mines;	//Get number of mines
+          int x_rand = 0;//x for rand
+          int y_rand = 0;//y for rand
+
+          game_board.game_board[x][y] = 'B';//Sets first move as not a mine
+
+
+          srand((unsigned) time(&t));//Seed rand function with current time
+
+          while (mines > 0)//While not all mines generated
+          {
+            x_rand = rand() % game_board.x;//Random x mod size of board
+            y_rand = rand() % game_board.y;//random y mod size of board
+
+            if(game_board.game_board[x_rand][y_rand] == '0')//Make sure only to generate mines on empty and not duplicate
+            {
+              game_board.game_board[x_rand][y_rand] = 'M';
+              mines--;
+            }
+          }
+
+          game_board_reveal(x, y);//Make first move to reveal board
+
+          copy_game_board = game_board;
+        }
+        else
+        {
+          game_board_reveal(x, y);//Check move and reveal board
+
+          int count = 0;
+
+          for( int index_x = 0; index_x < game_board.x; index_x++)//Cycle
+          {
+            for(int index_y = 0; index_y < game_board.y; index_y++)//Cycle
+            {
+              if(game_board.game_board[index_x][index_y] == '0')//Count unraveled spaces
               {
-                      POINT mouse_point;
-
-                      int x = 0;
-                      int y = 0;
-
-                      RECT rcWindow;
-                      GetClientRect(hwnd, &rcWindow);
-
-                      int boardWidth  = game_board.x * BITMAP_PIXEL_X;
-                      int boardHeight = game_board.y * BITMAP_PIXEL_Y;
-
-                      // Calculate centering offsets
-                      int offsetX = (rcWindow.right - boardWidth) / 2;
-                      int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
-
-                      // Ensure offsets aren't negative if window is too small
-                      if (offsetX < 0) offsetX = 0;
-                      if (offsetY < 0) offsetY = 0;
-
-                      GetCursorPos(&mouse_point);
-                      ScreenToClient(hwnd, &mouse_point);
-
-                      if (mouse_point.x < offsetX || mouse_point.y < offsetY)
-                      {
-                          break;
-                      }
-
-                      x = (mouse_point.x-offsetX) / BITMAP_PIXEL_X;
-                      y = (mouse_point.y-offsetY) / BITMAP_PIXEL_Y;
-
-                      if(x >= game_board.x || y >= game_board.y || x < 0 || y < 0)
-                      {
-                              break;
-                      }
-
-                      if(game_board.flag_board[x][y] == 'F')
-                      {
-                              break;
-                      }
-
-              if(game_board.first_start == 1)
-              {
-                      game_board.first_start = 0;
-
-                      time_t t;													//Time variable for rand() seed
-                      int mines = game_board.mines;								//Get number of mines
-                      int x_rand = 0;												//x for rand
-                      int y_rand = 0;												//y for rand
-
-                      game_board.game_board[x][y] = 'B';							//Sets first move as not a mine
-
-
-                      srand((unsigned) time(&t));									//Seed rand function with current time
-
-                      while (mines > 0)											//While not all mines generated
-                      {
-                              x_rand = rand() % game_board.x;							//Random x mod size of board
-                              y_rand = rand() % game_board.y;							//random y mod size of board
-
-                              if(game_board.game_board[x_rand][y_rand] == '0')		//Make sure only to generate mines on empty and not duplicate
-                              {
-                                      game_board.game_board[x_rand][y_rand] = 'M';
-                                      mines--;
-                              }
-                      }
-
-                      game_board_reveal(x, y);									//Make first move to reveal board
-
-                      copy_game_board = game_board;
+                count++;
               }
-              else
+            }
+          }
+
+          if(count == 0)//If no spaces remain
+          {
+            game_board.lost = 2;//Set game over to won
+          }
+        }
+        if(game_board.lost == 1)
+        {
+          KillTimer(hwnd, ID_TIMER);
+          play = 0;
+
+          for( int index_x = 0; index_x < game_board.x; index_x++)//Cycle
+          {
+            for(int index_y = 0; index_y < game_board.y; index_y++)//Cycle
+            {
+              if(game_board.game_board[index_x][index_y] == '0')//Count unraveled spaces
               {
-                      game_board_reveal(x, y);									//Check move and reveal board
-
-                      int count = 0;
-
-                      for( int index_x = 0; index_x < game_board.x; index_x++)			//Cycle
-                      {
-                              for(int index_y = 0; index_y < game_board.y; index_y++)			//Cycle
-                              {
-                                      if(game_board.game_board[index_x][index_y] == '0')			//Count unraveled spaces
-                                      {
-                                              count++;
-                                      }
-                              }
-                      }
-
-                      if(count == 0)														//If no spaces remain
-                      {
-                              game_board.lost = 2;											//Set game over to won
-                      }
+                game_board_reveal(index_x, index_y);
               }
-              if(game_board.lost == 1)
-              {
-                      KillTimer(hwnd, ID_TIMER);
-                      play = 0;
+            }
+          }
 
-                      for( int index_x = 0; index_x < game_board.x; index_x++)			//Cycle
-                      {
-                              for(int index_y = 0; index_y < game_board.y; index_y++)			//Cycle
-                              {
-                                      if(game_board.game_board[index_x][index_y] == '0')			//Count unraveled spaces
-                                      {
-                                              game_board_reveal(index_x, index_y);
-                                      }
-                              }
-                      }
-
-                      InvalidateRect(hwnd, 0, TRUE);
+          InvalidateRect(hwnd, 0, TRUE);
           int ret_lost = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GAME_OVER), hwnd, (DLGPROC)STD_DlgProc);
           if(ret_lost == -1)
           {
-              MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-              PostMessage(hwnd, WM_CLOSE, 0, 0);
+            MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+            PostMessage(hwnd, WM_CLOSE, 0, 0);
           }
-              }
-              if(game_board.lost == 2)
-              {
-                      KillTimer(hwnd, ID_TIMER);
-                      play = 0;
-                      InvalidateRect(hwnd, 0, TRUE);
+        }
+        if(game_board.lost == 2)
+        {
+          KillTimer(hwnd, ID_TIMER);
+          play = 0;
+          InvalidateRect(hwnd, 0, TRUE);
           int ret_won = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GAME_WON), hwnd, (DLGPROC)STD_DlgProc);
           if(ret_won == -1)
           {
               MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
               PostMessage(hwnd, WM_CLOSE, 0, 0);
           }
-              }
+        }
       }
       InvalidateRect(hwnd, 0, TRUE);
       break;
+
       //Right click for flag
       case WM_RBUTTONDOWN:
-              if(play ==1)
-              {
-                      POINT mouse_point;
+        if(play ==1)
+        {
+          POINT mouse_point;
 
-                      int x = 0;
-                      int y = 0;
+          int x = 0;
+          int y = 0;
 
-                      RECT rcWindow;
-                      GetClientRect(hwnd, &rcWindow);
+          RECT rcWindow;
+          GetClientRect(hwnd, &rcWindow);
 
-                      int boardWidth  = game_board.x * BITMAP_PIXEL_X;
-                      int boardHeight = game_board.y * BITMAP_PIXEL_Y;
+          int boardWidth  = game_board.x * BITMAP_PIXEL_X;
+          int boardHeight = game_board.y * BITMAP_PIXEL_Y;
 
-                      // Calculate centering offsets
-                      int offsetX = (rcWindow.right - boardWidth) / 2;
-                      int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
+          // Calculate centering offsets
+          int offsetX = (rcWindow.right - boardWidth) / 2;
+          int offsetY = (rcWindow.bottom - boardHeight - 30) / 2;
 
-                      // Ensure offsets aren't negative if window is too small
-                      if (offsetX < 0) offsetX = 0;
-                      if (offsetY < 0) offsetY = 0;
+          // Ensure offsets aren't negative if window is too small
+          if (offsetX < 0) offsetX = 0;
+          if (offsetY < 0) offsetY = 0;
 
-                      GetCursorPos(&mouse_point);
-                      ScreenToClient(hwnd, &mouse_point);
+          GetCursorPos(&mouse_point);
+          ScreenToClient(hwnd, &mouse_point);
 
-                      if (mouse_point.x < offsetX || mouse_point.y < offsetY)
-                      {
-                          break;
-                      }
-
-                      x = (mouse_point.x-offsetX) / BITMAP_PIXEL_X;
-                      y = (mouse_point.y-offsetY) / BITMAP_PIXEL_Y;
-
-                      if(x >= game_board.x || y >= game_board.y || x < 0 || y < 0)
-                      {
-                              break;
-                      }
-
-
-                      if(game_board.game_board[x][y] != '0' && game_board.game_board[x][y] != 'M' )
-                      {
-                              break;
-                      }
-                      if(game_board.flag_board[x][y] == 'F')					//If flag remove
-                      {
-                              game_board.flag_board[x][y] = '0';
-                              game_board.remain_mines++;
-                      }
-                      else if(game_board.flag_board[x][y] == '0')				//If no flag add
-                      {
-                              if(game_board.remain_mines == 0)							//Check to not more flags than mines are set
-                              {
-                                      break;
-                              }
-                              game_board.flag_board[x][y] = 'F';
-                              game_board.remain_mines--;
-                      }
-
-                      if(game_board.remain_mines == 0)
-                      {
-                              int won = 0;														//Set to not won
-
-                              for( int index_x = 0; index_x < game_board.x; index_x++)			//Cycle
-                              {
-                                      for(int index_y = 0; index_y < game_board.y; index_y++)			//cycle
-                                      {
-                                              if (game_board.flag_board[index_x][index_y] == 'F')			//if flag at this location
-                                              {
-                                                      if(game_board.game_board[index_x][index_y] == 'M')		//check for mine
-                                                      {
-                                                              won++;											//if mine set to won
-                                                      }
-                                              }
-                                      }
-                              }
-                              if(won == game_board.mines)														//If won game
-                              {
-                                      game_board.lost = 2;											//Set game over to won
-                              }
-                      }
-              if(game_board.lost == 2)
-              {
-                      play = 0;
-                      KillTimer(hwnd, ID_TIMER);
-                      InvalidateRect(hwnd, 0, TRUE);
-          int ret_won = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GAME_WON), hwnd, (DLGPROC)STD_DlgProc);
-          if(ret_won == -1)
+          if (mouse_point.x < offsetX || mouse_point.y < offsetY)
           {
+            break;
+          }
+
+          x = (mouse_point.x-offsetX) / BITMAP_PIXEL_X;
+          y = (mouse_point.y-offsetY) / BITMAP_PIXEL_Y;
+
+          if(x >= game_board.x || y >= game_board.y || x < 0 || y < 0)
+          {
+            break;
+          }
+
+
+          if(game_board.game_board[x][y] != '0' && game_board.game_board[x][y] != 'M' )
+          {
+            break;
+          }
+          if(game_board.flag_board[x][y] == 'F')//If flag remove
+          {
+            game_board.flag_board[x][y] = '0';
+            game_board.remain_mines++;
+          }
+          else if(game_board.flag_board[x][y] == '0')//If no flag add
+          {
+            if(game_board.remain_mines == 0)//Check to not more flags than mines are set
+            {
+              break;
+            }
+            game_board.flag_board[x][y] = 'F';
+            game_board.remain_mines--;
+          }
+
+          if(game_board.remain_mines == 0)
+          {
+            int won = 0;//Set to not won
+
+            for( int index_x = 0; index_x < game_board.x; index_x++)//Cycle
+            {
+              for(int index_y = 0; index_y < game_board.y; index_y++)//cycle
+              {
+                if (game_board.flag_board[index_x][index_y] == 'F')//if flag at this location
+                {
+                  if(game_board.game_board[index_x][index_y] == 'M')//check for mine
+                  {
+                    won++;//if mine set to won
+                  }
+                }
+              }
+            }
+            if(won == game_board.mines)	//If won game
+            {
+              game_board.lost = 2;//Set game over to won
+            }
+          }
+          if(game_board.lost == 2)
+          {
+            play = 0;
+            KillTimer(hwnd, ID_TIMER);
+            InvalidateRect(hwnd, 0, TRUE);
+            int ret_won = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GAME_WON), hwnd, (DLGPROC)STD_DlgProc);
+            if(ret_won == -1)
+            {
               MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
               PostMessage(hwnd, WM_CLOSE, 0, 0);
+            }
           }
-              }
-                      InvalidateRect(hwnd, 0, TRUE);
-      }
-      break;
+        InvalidateRect(hwnd, 0, TRUE);
+        }
+        break;
+
       //Timer counting is seconds
       case WM_TIMER:
-              {
-                      timer_value++;
-              }
-              InvalidateRect(hwnd, 0, TRUE);
-              break;
+        {
+          timer_value++;
+        }
+        InvalidateRect(hwnd, 0, TRUE);
+      break;
+
       //Close window
       case WM_CLOSE:
-              if ( MessageBox( hwnd, "Are you sure you want to quit?", "Confirmation", MB_ICONQUESTION | MB_YESNO ) == IDYES )
-              {
-                      DestroyWindow(hwnd);
-              }
+        if ( MessageBox( hwnd, "Are you sure you want to quit?", "Confirmation", MB_ICONQUESTION | MB_YESNO ) == IDYES )
+        {
+          DestroyWindow(hwnd);
+        }
       break;
+
       //cleanup
       case WM_DESTROY:
-              clear_game_board();
-              KillTimer(hwnd, ID_TIMER);
-              DeleteObject(blank_space);
-              DeleteObject(blank_space_empty);
-              DeleteObject(mine_black);
-              DeleteObject(mine_red);
-              for(int index = 0; index < 8; index++)
-              {
-              DeleteObject(space_numbers[index]);
-              }
-          PostQuitMessage(0);
+        clear_game_board();
+        KillTimer(hwnd, ID_TIMER);
+        DeleteObject(blank_space);
+        DeleteObject(blank_space_empty);
+        DeleteObject(mine_black);
+        DeleteObject(mine_red);
+        for(int index = 0; index < 8; index++)
+        {
+        DeleteObject(space_numbers[index]);
+        }
+        PostQuitMessage(0);
       break;
+
       default:
-          return DefWindowProc(hwnd, msg, wParam, lParam);
+        return DefWindowProc(hwnd, msg, wParam, lParam);
   }
   return 0;
 }
@@ -751,22 +758,22 @@ BOOL CALLBACK STD_DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
   switch(Message)
   {
-      case WM_INITDIALOG:
+    case WM_INITDIALOG:
 
-      return TRUE;
-      case WM_COMMAND:
-          switch(LOWORD(wParam))
-          {
-              case IDOK:
-                  EndDialog(hwnd, IDOK);
-              break;
-              case IDCANCEL:
-                  EndDialog(hwnd, IDCANCEL);
-              break;
-          }
-      break;
-      default:
-          return FALSE;
+    return TRUE;
+    case WM_COMMAND:
+      switch(LOWORD(wParam))
+      {
+        case IDOK:
+          EndDialog(hwnd, IDOK);
+        break;
+        case IDCANCEL:
+          EndDialog(hwnd, IDCANCEL);
+        break;
+      }
+    break;
+    default:
+      return FALSE;
   }
   return TRUE;
 }
@@ -780,31 +787,31 @@ BOOL CALLBACK New_Game_DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lP
 {
   switch(Message)
   {
-      case WM_INITDIALOG:
+    case WM_INITDIALOG:
 
-      return TRUE;
-      case WM_COMMAND:
-          switch(LOWORD(wParam))
-          {
-              case IDP_EASY:
-                  EndDialog(hwnd, IDP_EASY);
-              break;
-              case IDP_NORMAL:
-                  EndDialog(hwnd, IDP_NORMAL);
-              break;
-              case IDP_HARD:
-                  EndDialog(hwnd, IDP_HARD);
-              break;
-              case IDP_CUSTOM:
-                  EndDialog(hwnd, IDP_CUSTOM);
-              break;
-              case IDCANCEL:
-                  EndDialog(hwnd, IDCANCEL);
-              break;
-          }
-      break;
-      default:
-          return FALSE;
+    return TRUE;
+    case WM_COMMAND:
+      switch(LOWORD(wParam))
+      {
+        case IDP_EASY:
+          EndDialog(hwnd, IDP_EASY);
+        break;
+        case IDP_NORMAL:
+          EndDialog(hwnd, IDP_NORMAL);
+        break;
+        case IDP_HARD:
+          EndDialog(hwnd, IDP_HARD);
+        break;
+        case IDP_CUSTOM:
+          EndDialog(hwnd, IDP_CUSTOM);
+        break;
+        case IDCANCEL:
+          EndDialog(hwnd, IDCANCEL);
+        break;
+      }
+    break;
+    default:
+        return FALSE;
   }
   return TRUE;
 }
@@ -818,73 +825,75 @@ BOOL CALLBACK Custom_Game_DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM
 {
   switch(Message)
   {
-      case WM_INITDIALOG:
+    case WM_INITDIALOG:
 
-      return TRUE;
-      case WM_COMMAND:
-          switch(LOWORD(wParam))
+    return TRUE;
+    case WM_COMMAND:
+      switch(LOWORD(wParam))
+      {
+        case IDOK:;
+          TCHAR buff_X[BUFFER_INT] = {0};
+          GetDlgItemText(hwnd, IDE_CUSTOM_X, buff_X, 1024);
+          TCHAR buff_Y[BUFFER_INT] = {0};
+          GetDlgItemText(hwnd, IDE_CUSTOM_Y, buff_Y, 1024);
+          TCHAR buff_mines[BUFFER_INT] = {0};
+          GetDlgItemText(hwnd, IDE_CUSTOM_MINES, buff_mines, 1024);
+
+          int x = 0;
+          int y = 0;
+          int mines = 0;
+
+          sscanf_s(buff_X, "%d", &x);
+          sscanf_s(buff_Y, "%d", &y);
+          sscanf_s(buff_mines, "%d", &mines);
+
+          if(mines < MIN_MINES)	//Check for min values
           {
-              case IDOK:;
-                      TCHAR buff_X[BUFFER_INT] = {0};
-                      GetDlgItemText(hwnd, IDE_CUSTOM_X, buff_X, 1024);
-                      TCHAR buff_Y[BUFFER_INT] = {0};
-                      GetDlgItemText(hwnd, IDE_CUSTOM_Y, buff_Y, 1024);
-                      TCHAR buff_mines[BUFFER_INT] = {0};
-                      GetDlgItemText(hwnd, IDE_CUSTOM_MINES, buff_mines, 1024);
-
-                      int x = 0;
-                      int y = 0;
-                      int mines = 0;
-
-                      sscanf_s(buff_X, "%d", &x);
-                      sscanf_s(buff_Y, "%d", &y);
-                      sscanf_s(buff_mines, "%d", &mines);
-
-                      if(mines < MIN_MINES)														//Check for min values
-                      {
-                              mines = MIN_MINES;
-                      }
-                      if(x < MIN_X)
-                      {
-                              x = MIN_X;
-                      }
-                      if(y < MIN_Y)
-                      {
-                              y = MIN_Y;
-                      }
-
-                      if(mines > MAX_MINES)														//Check for min values
-                                      {
-                                              mines = MAX_MINES;
-                                      }
-                      if(mines > x*y)
-                      {
-                              mines = x*y - 2;														//Ensure they dont just auto win
-                      }
-
-
-                                      if(x > MAX_X)
-                                      {
-                                              x = MAX_X;
-                                      }
-                                      if(y > MAX_Y)
-                                      {
-                                              y = MAX_Y;
-                                      }
-
-                      custom_x = x;
-                      custom_y = y;
-                      custom_mines = mines;
-
-                  EndDialog(hwnd, IDOK);
-              break;
-              case IDCANCEL:
-                  EndDialog(hwnd, IDCANCEL);
-              break;
+            mines = MIN_MINES;
           }
-      break;
-      default:
-          return FALSE;
+          if(x < MIN_X)
+          {
+            x = MIN_X;
+          }
+          if(y < MIN_Y)
+          {
+            y = MIN_Y;
+          }
+
+          if(mines > MAX_MINES)	//Check for min values
+          {
+            mines = MAX_MINES;
+          }
+          if(mines > x*y)
+          {
+            mines = x*y - 2;//Ensure they dont just auto win
+          }
+
+          if(x > MAX_X)
+          {
+            x = MAX_X;
+          }
+          if(y > MAX_Y)
+          {
+            y = MAX_Y;
+          }
+
+          custom_x = x;
+          custom_y = y;
+          custom_mines = mines;
+
+          EndDialog(hwnd, IDOK);
+        break;
+
+        case IDCANCEL:
+          EndDialog(hwnd, IDCANCEL);
+        break;
+
+    }
+    break;
+
+    default:
+      return FALSE;
   }
   return TRUE;
 }
@@ -896,49 +905,49 @@ BOOL CALLBACK Custom_Game_DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM
  */
 void new_game_board(int x, int y, int mines)
 {
-  game_board.x = 0;													//Initialize 0
-  game_board.y = 0;													//Initialize 0
-  game_board.mines = 0;												//Initialize 0
-  game_board.remain_mines = 0;										//Initialize 0
-  game_board.lost = 0;												//Initialize 0
+  game_board.x = 0;
+  game_board.y = 0;
+  game_board.mines = 0;
+  game_board.remain_mines = 0;
+  game_board.lost = 0;
   game_board.l_x = 0;
   game_board.l_y = 0;
   game_board.first_start = 1;
 
-  int ** game_board_int = malloc(x*sizeof(int *));					//Create 2D pointer array of int and allocate memory
-  for(int index = 0; index < x; index++)								//Cycle
+  int ** game_board_int = malloc(x*sizeof(int *));
+  for(int index = 0; index < x; index++)
   {
-          game_board_int[index] = malloc(y*sizeof(int));				//Allocate memory
+    game_board_int[index] = malloc(y*sizeof(int));
   }
 
-  for(int index_x = 0; index_x < x; index_x++)						//Cycle All
+  for(int index_x = 0; index_x < x; index_x++)
   {
-          for(int index_y = 0; index_y < y; index_y++)					//Cycle
-          {
-                  game_board_int[index_x][index_y] = '0';						//Initialize '0'
-          }
+    for(int index_y = 0; index_y < y; index_y++)
+    {
+      game_board_int[index_x][index_y] = '0';//Initialize '0'
+    }
   }
-  int ** flag_board_int = malloc(x*sizeof(int*));					//Create 2D pointer array of int and allocate memory
-  for(int index = 0; index < x; index++)								//Cycle
+  int ** flag_board_int = malloc(x*sizeof(int*));
+  for(int index = 0; index < x; index++)
   {
-          flag_board_int[index] = malloc(y*sizeof(int));				//Allocate Memory
+    flag_board_int[index] = malloc(y*sizeof(int));
   }
 
-  for(int index_x = 0; index_x < x; index_x++)						//Cycle All
+  for(int index_x = 0; index_x < x; index_x++)
   {
-          for(int index_y = 0; index_y < y; index_y++)					//Cycle
-          {
-                  flag_board_int[index_x][index_y] = '0';						//Initialise '0'
-          }
+    for(int index_y = 0; index_y < y; index_y++)
+    {
+      flag_board_int[index_x][index_y] = '0';//Initialise '0'
+    }
   }
-  game_board.game_board = game_board_int;								//Assign allocated memory
-  game_board.flag_board = flag_board_int;								//Assign allocated memory
-  game_board.x = x;													//Assign x from input
-  game_board.y = y;													//Assign y from input
-  game_board.mines = mines;											//Assign mines from input
-  game_board.remain_mines = mines;									//Assign equal to mines
+  game_board.game_board = game_board_int;
+  game_board.flag_board = flag_board_int;
+  game_board.x = x;
+  game_board.y = y;
+  game_board.mines = mines;
+  game_board.remain_mines = mines;
 
-  return;													//Return game_board structure
+  return;
 }
 
 
@@ -950,14 +959,14 @@ void new_game_board(int x, int y, int mines)
 void clear_game_board()
 {
   if (game_board.game_board != NULL) {
-      for(int i = 0; i < game_board.x; i++) {
-          free(game_board.game_board[i]);
-          free(game_board.flag_board[i]);
-      }
-      free(game_board.game_board);
-      free(game_board.flag_board);
-  }									//Free Memory
-      return;
+    for(int i = 0; i < game_board.x; i++) {
+      free(game_board.game_board[i]);
+      free(game_board.flag_board[i]);
+    }
+    free(game_board.game_board);
+    free(game_board.flag_board);
+  }
+  return;
 }
 
 /*
@@ -967,17 +976,17 @@ void clear_game_board()
  */
 void game_board_reveal(int x, int y)
 {
-  if(game_board.game_board[x][y] == 'M')				//If move hit mine
+  if(game_board.game_board[x][y] == 'M')//If move hit mine
   {
-          game_board.lost = 1;							//Game over and lost
-          game_board.l_x = x;								//x of losing move
-          game_board.l_y = y;								//y of losing move
-          return;								//return board
+    game_board.lost = 1;//Game over and lost
+    game_board.l_x = x;	//x of losing move
+    game_board.l_y = y;	//y of losing move
+    return;
   }
 
-  reveal_r(x, y);						//Call recursive function with move
+  reveal_r(x, y);//Call recursive function with move
 
-  return;												//Return
+  return;
 }
 
 /*
@@ -987,38 +996,38 @@ void game_board_reveal(int x, int y)
  */
 void reveal_r(int x, int y)
 {
-  int count = 0;																										//Set count to zero
+  int count = 0;
 
-  for(int index = 0; index < 8; index++)																				//Cycle surrounding mines
+  for(int index = 0; index < 8; index++)//Cycle surrounding mines
   {
-          int x1 = x + adjacents[index][0];
-          int y1 = y + adjacents[index][1];
+    int x1 = x + adjacents[index][0];
+    int y1 = y + adjacents[index][1];
 
-          if( x1 >= 0 && y1 >= 0 && x1 < game_board.x && y1 < game_board.y && game_board.game_board[x1][y1] == 'M')	//Count mines
-          {
-                  count++;
-          }
+    if( x1 >= 0 && y1 >= 0 && x1 < game_board.x && y1 < game_board.y && game_board.game_board[x1][y1] == 'M')	//Count mines
+    {
+      count++;
+    }
   }
 
-  if(count > 0)																										//If mines found
+  if(count > 0)	//If mines found
   {
-          game_board.game_board[x][y] = count + '0';																		//Store value
-          game_board.flag_board[x][y] = '0';
-          return;																											//Exit
+    game_board.game_board[x][y] = count + '0';
+    game_board.flag_board[x][y] = '0';
+    return;
   }
 
-  game_board.game_board[x][y] = 'B';																					//If no mines found set to 'B'
+  game_board.game_board[x][y] = 'B';//If no mines found set to 'B'
   game_board.flag_board[x][y] = '0';
 
-  for(int index = 0; index < 8; index++)																				//Cycle surrounding fields
+  for(int index = 0; index < 8; index++)//Cycle surrounding fields
   {
-          int x1 = x + adjacents[index][0];
-          int y1 = y + adjacents[index][1];
+    int x1 = x + adjacents[index][0];
+    int y1 = y + adjacents[index][1];
 
-          if( x1 >= 0 && y1 >= 0 && x1 < game_board.x && y1 < game_board.y && game_board.game_board[x1][y1] == '0')	//If not revealed yet
-          {
-                  reveal_r(x1, y1);																				//Recursive call
-          }
+    if( x1 >= 0 && y1 >= 0 && x1 < game_board.x && y1 < game_board.y && game_board.game_board[x1][y1] == '0')	//If not revealed yet
+    {
+      reveal_r(x1, y1);	//Recursive call
+    }
   }
   return;
 }
