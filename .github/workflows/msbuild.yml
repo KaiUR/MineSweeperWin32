@@ -65,7 +65,7 @@ jobs:
         git config --global user.email "${{ steps.import-gpg.outputs.email }}"
         git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
 
-        git config --global gpg.program gpg
+        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
         git config --global commit.gpgsign true
         
         git checkout -B master origin/master
@@ -74,7 +74,7 @@ jobs:
         git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
-          git commit -S -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]" --pinentry-mode loopback
+          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
           git push origin master
         fi
         
@@ -89,7 +89,7 @@ jobs:
         git tag -d "$BASE_TAG" || true
         git push origin --delete "$BASE_TAG" || true
 
-        git tag -s "$FULL_VERSION" -m "Release $FULL_VERSION" --pinentry-mode loopback
+        git tag "$FULL_VERSION" -m "Release $FULL_VERSION"
         git push origin "$FULL_VERSION"
         
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
