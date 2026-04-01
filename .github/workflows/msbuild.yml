@@ -37,6 +37,7 @@ jobs:
         echo "Thanks to everyone who has helped with MineSweeperWin32:" >> CONTRIBUTORS.md
         echo "" >> CONTRIBUTORS.md
         
+        # This pulls all unique committers and formats them as a Markdown list
         git shortlog -sn --all | cut -f2- | sed 's/^/* /' >> CONTRIBUTORS.md
         
         echo "CONTRIBUTORS.md updated from Git history."
@@ -52,10 +53,10 @@ jobs:
       shell: bash
       run: |
         git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@://github.com"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
         git checkout -B master origin/master
-        git pull origin master
+        git pull origin master # Keep it sync'd
         
         git add build_number.txt CONTRIBUTORS.md
         
@@ -67,16 +68,19 @@ jobs:
     - name: Create Release and Upload Assets
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         BASE_TAG=${{ github.ref_name }}
         BUILD_NUM=$(cat build_number.txt)
-        FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         
-        git tag -d "$BASE_TAG" || true
-        git push origin --delete "$BASE_TAG" || true
+        FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
+        echo "Creating release for $FULL_VERSION"
+
+        git tag -d "$BASE_TAG"
+        git push --delete origin "$BASE_TAG"
         
         gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
           --title "MineSweeper $FULL_VERSION" \
-          --generate-notes
+          --generate-notes \
+          --target master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
