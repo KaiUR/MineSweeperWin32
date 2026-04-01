@@ -18,15 +18,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
-    - name: Import GPG key
-      id: import-gpg
-      uses: crazy-max/ghaction-import-gpg@v6
-      with:
-        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.GPG_PASSPHRASE }}
-        git_user_signingkey: true
-        git_commit_gpgsign: true
 
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
@@ -45,7 +36,10 @@ jobs:
         echo "" >> CONTRIBUTORS.md
         echo "Thanks to everyone who has helped with MineSweeperWin32:" >> CONTRIBUTORS.md
         echo "" >> CONTRIBUTORS.md
+        
         git shortlog -sn --all | cut -f2- | sed 's/^/* /' >> CONTRIBUTORS.md
+        
+        echo "CONTRIBUTORS.md updated from Git history."
 
     - name: Configure and Build
       shell: msys2 {0}
@@ -57,10 +51,8 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
       run: |
-        git config --global user.name "${{ steps.import-gpg.outputs.name }}"
-        git config --global user.email "${{ steps.import-gpg.outputs.email }}"
-        git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
-        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@://github.com"
         
         git checkout -B master origin/master
         git pull origin master
@@ -68,11 +60,10 @@ jobs:
         git add build_number.txt CONTRIBUTORS.md
         
         if ! git diff --staged --quiet; then
-          echo "${{ secrets.GPG_PASSPHRASE }}" | git commit -S -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]" --passphrase-fd 0
+          git commit -m "chore: increment build number for release ${{ github.ref_name }} [skip ci]"
           git push origin master
         fi
-        gpgconf --kill gpg-agent
-
+        
     - name: Create Release and Upload Assets
       if: startsWith(github.ref, 'refs/tags/v')
       shell: bash
@@ -83,13 +74,9 @@ jobs:
         BUILD_NUM=$(cat build_number.txt)
         FULL_VERSION="${BASE_TAG}.${BUILD_NUM}"
         
-        git config --global gpg.program "gpg --batch --pinentry-mode loopback"
-        
         git tag -d "$BASE_TAG" || true
         git push origin --delete "$BASE_TAG" || true
-
-        echo "${{ secrets.GPG_PASSPHRASE }}" | git tag -s "$FULL_VERSION" -m "Release $FULL_VERSION" --passphrase-fd 0
-        git push origin "$FULL_VERSION"
         
-        gh release create "$FULL_VERSION" build/MineSweeperWin32.exe --title "MineSweeper $FULL_VERSION" --generate-notes
-        gpgconf --kill gpg-agent
+        gh release create "$FULL_VERSION" build/MineSweeperWin32.exe \
+          --title "MineSweeper $FULL_VERSION" \
+          --generate-notes
